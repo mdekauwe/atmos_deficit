@@ -39,9 +39,9 @@ def main(flux_dir, dates, ofname):
     ax = fig.add_subplot(1,1,1)
 
     site_list = glob.glob(os.path.join(flux_dir, "*_flux.nc"))
-    NUM_COLORS = len(site_list)
-    LINE_STYLES = ['solid', 'dashed', 'dashdot', 'dotted']
-    NUM_STYLES = len(LINE_STYLES)
+    n_colours = len(site_list)
+    line_styles = ['solid', 'dashed', 'dashdot', 'dotted']
+    n_styles = len(line_styles)
     #cm = plt.get_cmap('viridis')
     cm = plt.get_cmap('gist_rainbow')
 
@@ -52,12 +52,12 @@ def main(flux_dir, dates, ofname):
         df = df[(df['Qle_qc'] == 1) & (df['Qh_qc'] == 1)]
         df = df.iloc[df.index.indexer_between_time('09:00', '18:00')]
         calc_pet(df)
-        get_deficit(df)
+        df["deficit"] = df.Qle - df.PET
         df = df.resample("M").agg("mean")
 
         lines = ax.plot(df["deficit"], label=site)
-        lines[0].set_color(cm(i//NUM_STYLES*float(NUM_STYLES)/NUM_COLORS))
-        lines[0].set_linestyle(LINE_STYLES[i%NUM_STYLES])
+        lines[0].set_color(cm(i // n_styles * float(n_styles) / n_colours))
+        lines[0].set_linestyle(line_styles[i % n_styles])
 
     ax.axhline(y=0.0, ls="--", color="grey", alpha=0.3)
     ax.set_xlabel("Date")
@@ -79,9 +79,6 @@ def calc_pet(df):
     """
     df["PET"] = 0.8 * (df.Qh + df.Qle)
 
-def get_deficit(df):
-    df["deficit"] = df.Qle - df.PET
-
 if __name__ == "__main__":
 
     flux_dir = "/Users/mdekauwe/research/OzFlux"
@@ -89,6 +86,6 @@ if __name__ == "__main__":
     ofname = "/Users/mdekauwe/Desktop/Atmos_deficit_2002_2011.pdf"
     main(flux_dir, dates, ofname)
 
-    dates = dt.datetime(2011,1,1), dt.datetime(2015,1,1)
-    ofname = "/Users/mdekauwe/Desktop/Atmos_deficit_2011_2015.pdf"
+    dates = dt.datetime(2010,1,1), dt.datetime(2015,1,1)
+    ofname = "/Users/mdekauwe/Desktop/Atmos_deficit_2010_2015.pdf"
     main(flux_dir, dates, ofname)
